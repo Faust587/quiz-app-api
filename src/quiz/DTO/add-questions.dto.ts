@@ -10,5 +10,5 @@ export class AddQuestionsDto {
   @ValidateNested()
   @IsArray()
   @Type(() => QuestionDto)
-  question: QuestionDto[];
+  questions: QuestionDto[];
 }

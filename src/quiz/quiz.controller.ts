@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Post, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Post,
+  Req,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { QuestionType, QuestionTypeDocument } from './question-type.schema';
@@ -32,10 +43,17 @@ export class QuizController {
   }
 
 
-  @Post("/add-question")
+  @Post('/add-question')
   @UseGuards(AuthGuard())
   @UsePipes(ValidationPipe)
-  async addQuestionToQuiz(@Body() addQuestionDto: AddQuestionsDto) {
-    return "OK";
+  async addQuestionToQuiz(@Req() req: Request, @Body() addQuestionDto: AddQuestionsDto) {
+    const { id } = req.user as IJwtPayload;
+    const {
+      quizId,
+      questions,
+    } = addQuestionDto;
+
+    await this.quizService.checkQuizAuthor(quizId, id);
+    return await this.quizService.addQuestionToQuiz(quizId, questions);
   }
 }

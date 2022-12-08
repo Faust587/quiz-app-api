@@ -12,7 +12,7 @@ export class Quiz {
     ref: User.name,
     required: true,
   })
-  author: User;
+  author: string;
 
   @Prop({
     required: true,
