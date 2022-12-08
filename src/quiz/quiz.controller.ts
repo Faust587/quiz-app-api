@@ -7,6 +7,7 @@ import { CreateQuizDto } from './DTO/create-quiz.dto';
 import { QuizService } from './quiz.service';
 import { Request } from 'express';
 import { IJwtPayload } from '../auth/jwt-payload.interface';
+import { AddQuestionsDto } from './DTO/add-questions.dto';
 
 @Controller('quiz')
 export class QuizController {
@@ -28,5 +29,13 @@ export class QuizController {
     const { id } = req.user as IJwtPayload;
     const quiz = await this.quizService.createQuiz(createQuizDto, id);
     return quiz;
+  }
+
+
+  @Post("/add-question")
+  @UseGuards(AuthGuard())
+  @UsePipes(ValidationPipe)
+  async addQuestionToQuiz(@Body() addQuestionDto: AddQuestionsDto) {
+    return "OK";
   }
 }
