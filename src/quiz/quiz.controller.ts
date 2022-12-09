@@ -1,15 +1,4 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  InternalServerErrorException,
-  Post,
-  Req,
-  UseGuards,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { QuestionType, QuestionTypeDocument } from './question-type.schema';
@@ -19,6 +8,7 @@ import { QuizService } from './quiz.service';
 import { Request } from 'express';
 import { IJwtPayload } from '../auth/jwt-payload.interface';
 import { AddQuestionsDto } from './DTO/add-questions.dto';
+import { QuizAuthorGuard } from './quiz-author.guard';
 
 @Controller('quiz')
 export class QuizController {
@@ -38,12 +28,12 @@ export class QuizController {
   @UsePipes(ValidationPipe)
   async createQuiz(@Body() createQuizDto: CreateQuizDto, @Req() req: Request) {
     const { id } = req.user as IJwtPayload;
-    const quiz = await this.quizService.createQuiz(createQuizDto, id);
-    return quiz;
+    return await this.quizService.createQuiz(createQuizDto, id);
   }
 
 
   @Post('/add-question')
+  @UseGuards(QuizAuthorGuard)
   @UseGuards(AuthGuard())
   @UsePipes(ValidationPipe)
   async addQuestionToQuiz(@Req() req: Request, @Body() addQuestionDto: AddQuestionsDto) {
@@ -53,7 +43,6 @@ export class QuizController {
       questions,
     } = addQuestionDto;
 
-    await this.quizService.checkQuizAuthor(quizId, id);
     return await this.quizService.addQuestionToQuiz(quizId, questions);
   }
 }

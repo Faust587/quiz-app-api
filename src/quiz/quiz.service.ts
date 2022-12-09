@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Quiz, QuizDocument } from './quiz.schema';
@@ -16,13 +16,11 @@ export class QuizService {
   public async createQuiz(createQuizDto: CreateQuizDto, authorId: string) {
     const { name } = createQuizDto;
     const code = await this.codeGeneratorService.getCode(6);
-    const quiz = await this.quizModel.create({
+    return await this.quizModel.create({
       name: name,
       code: code,
       author: authorId,
     });
-
-    return quiz;
   }
 
   public async addQuestionToQuiz(quizId: string, questions: QuestionDto[]) {
@@ -32,13 +30,6 @@ export class QuizService {
       }
       throw new InternalServerErrorException();
     });
-  }
-
-  public async checkQuizAuthor(quizId: string, authorId: string) {
-    const quiz = await this.quizModel.findById(quizId);
-
-    if (!quiz) throw new BadRequestException('quiz id is not exists');
-    if (quiz.author !== authorId) throw new ForbiddenException('this quiz is not yours');
   }
 
   public async deleteQuiz(quizId: string) {
