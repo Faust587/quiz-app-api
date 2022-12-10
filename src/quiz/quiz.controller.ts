@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { QuestionType, QuestionTypeDocument } from './question-type.schema';
@@ -9,6 +9,7 @@ import { Request } from 'express';
 import { IJwtPayload } from '../auth/jwt-payload.interface';
 import { AddQuestionsDto } from './DTO/add-questions.dto';
 import { QuizAuthorGuard } from './quiz-author.guard';
+import { DeleteQuizDto } from './DTO/delete-quiz.dto';
 
 @Controller('quiz')
 export class QuizController {
@@ -37,12 +38,28 @@ export class QuizController {
   @UseGuards(AuthGuard())
   @UsePipes(ValidationPipe)
   async addQuestionToQuiz(@Req() req: Request, @Body() addQuestionDto: AddQuestionsDto) {
-    const { id } = req.user as IJwtPayload;
     const {
       quizId,
       questions,
     } = addQuestionDto;
 
     return await this.quizService.addQuestionToQuiz(quizId, questions);
+  }
+
+  @Delete()
+  @UseGuards(QuizAuthorGuard)
+  @UseGuards(AuthGuard())
+  @UsePipes(ValidationPipe)
+  async deleteQuiz(@Body() deleteQuizDto: DeleteQuizDto) {
+    const { quizId } = deleteQuizDto;
+
+    return await this.quizService.deleteQuizById(quizId);
+  }
+
+  @Get('/list')
+  @UseGuards(AuthGuard())
+  async getQuizzes(@Req() req: Request) {
+    const { id } = req.user as IJwtPayload;
+    return await this.quizService.getAllQuizzesByAuthor(id);
   }
 }

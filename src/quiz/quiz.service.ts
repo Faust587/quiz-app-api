@@ -14,12 +14,18 @@ export class QuizService {
   ) {}
 
   public async createQuiz(createQuizDto: CreateQuizDto, authorId: string) {
-    const { name } = createQuizDto;
+    const {
+      name,
+      onlyAuthUsers,
+      closed,
+    } = createQuizDto;
     const code = await this.codeGeneratorService.getCode(6);
     return await this.quizModel.create({
-      name: name,
-      code: code,
+      name,
+      code,
       author: authorId,
+      closed,
+      onlyAuthUsers,
     });
   }
 
@@ -32,7 +38,11 @@ export class QuizService {
     });
   }
 
-  public async deleteQuiz(quizId: string) {
+  public async deleteQuizById(quizId: string) {
+    return this.quizModel.deleteOne({ id: quizId });
+  }
 
+  public async getAllQuizzesByAuthor(authorId: string) {
+    return this.quizModel.find({ author: authorId }).select([ '_id', 'name', 'onlyAuthUsers', 'code', 'closed' ]);
   }
 }

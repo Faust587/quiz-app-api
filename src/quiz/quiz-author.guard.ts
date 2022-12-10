@@ -11,6 +11,7 @@ import { AddQuestionsDto } from './DTO/add-questions.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Quiz, QuizDocument } from './quiz.schema';
 import { Model } from 'mongoose';
+import { DeleteQuizDto } from './DTO/delete-quiz.dto';
 
 @Injectable()
 export class QuizAuthorGuard implements CanActivate {
@@ -24,7 +25,7 @@ export class QuizAuthorGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     const { id } = request.user as IJwtPayload;
-    const { quizId } = request.body as AddQuestionsDto;
+    const { quizId } = request.body as AddQuestionsDto | DeleteQuizDto;
 
     const quiz = await this.quizModel.findById(quizId).catch(e => {
       if (e.kind === 'ObjectId')

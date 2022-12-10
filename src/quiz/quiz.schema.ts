@@ -16,11 +16,25 @@ export class Quiz {
 
   @Prop({
     required: true,
+    type: String
   })
   name: string;
 
   @Prop({
     required: true,
+    type: Boolean
+  })
+  closed: boolean;
+
+  @Prop({
+    required: true,
+    type: Boolean
+  })
+  onlyAuthUsers: boolean;
+
+  @Prop({
+    required: true,
+    type: String,
     unique: true,
   })
   code: string;
