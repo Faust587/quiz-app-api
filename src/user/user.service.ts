@@ -1,17 +1,22 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './user.schema';
+import { User, UserDocument } from './model/user.schema';
 import { Model } from 'mongoose';
 import { genSalt, hash } from 'bcrypt';
 import { RegistrationUserDto } from '../auth/DTO/registration-user.dto';
 import { CreateUserDto } from './DTO/create-user.dto';
+import { TUser } from './user.type';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  public async createUser(registrationUserDto: RegistrationUserDto) {
-    const {username, password, email} = registrationUserDto;
+  public async createUser(registrationUserDto: RegistrationUserDto): Promise<TUser> {
+    const {
+      username,
+      password,
+      email,
+    } = registrationUserDto;
 
     const errors: string[] = [];
 
@@ -29,15 +34,38 @@ export class UserService {
     const hashedPassword = await this.hashPassword(password, salt);
     const createUserDTO = new CreateUserDto(username, email, hashedPassword, salt);
 
-    return await this.userModel.create(createUserDTO);
+    const user = await this.userModel.create(createUserDTO);
+    return {
+      id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      password: user.password,
+      activated: user.activated,
+    };
   }
 
-  public async getUserById(id: string) {
-    return this.userModel.findById(id);
+  public async getUserById(id: string): Promise<TUser> {
+    const user = await this.userModel.findById(id);
+    if (!user) throw new BadRequestException('user is not exists');
+    return {
+      id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      password: user.password,
+      activated: user.activated,
+    };
   }
 
-  public async getUserByUsername(username: string) {
-    return this.userModel.findOne({username})
+  public async getUserByUsername(username: string): Promise<TUser> {
+    const user = await this.userModel.findOne({ username });
+    if (!user) throw new BadRequestException('user is not exists');
+    return {
+      id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      password: user.password,
+      activated: user.activated,
+    };
   }
 
   private async hashPassword(password: string, salt: string): Promise<string> {

@@ -16,7 +16,6 @@ export class CodeGeneratorService {
     let isUnique = await this.checkCodeIsUnique(code);
 
     while (!isUnique) {
-      console.log(isUnique);
       code = this.generateCode(size);
       isUnique = await this.checkCodeIsUnique(code);
     }
@@ -41,6 +40,4 @@ export class CodeGeneratorService {
     let rand = Math.random() * ( this.SYMBOLS.length );
     return Math.floor(rand);
   }
-
-
 }

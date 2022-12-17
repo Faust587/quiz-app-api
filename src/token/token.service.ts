@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JsonWebTokenError } from "jsonwebtoken";
 import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
 import { IJwtPayload } from '../auth/jwt-payload.interface';
-import { RefreshToken, RefreshTokenDocument } from './token.schema';
-import { User } from '../user/user.schema';
+import { RefreshToken, RefreshTokenDocument } from './model/token.schema';
+import { User } from '../user/model/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
+import { TTokensPair } from './types/tokens-pair.type';
 
 @Injectable()
 export class TokenService {
@@ -13,14 +15,14 @@ export class TokenService {
     private jwtService: JwtService,
   ) {}
 
-  public generateTokensPair(payload: IJwtPayload) {
+  public generateTokensPair(payload: IJwtPayload): TTokensPair {
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
-      expiresIn: 1200,
+      expiresIn: 4000000,
     });
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
-      expiresIn: 2400,
+      expiresIn: 5000000,
     });
     return {
       accessToken,
@@ -28,15 +30,23 @@ export class TokenService {
     };
   }
 
-  public async isRefreshTokenExists(token: string) {
+  public async isRefreshTokenExists(token: string): Promise<boolean> {
     return !!await this.refreshTokenModel.findOne({ token });
   }
 
-  public async deleteRefreshTokenByToken(token: string) {
+  public async deleteRefreshTokenByToken(token: string): Promise<void> {
     await this.refreshTokenModel.findOneAndDelete({ token });
   }
 
-  public getPayloadFromToken(token: string) {
+  public checkRefreshToken(token: string): void {
+    try {
+      this.jwtService.verify(token, { secret: process.env.JWT_SECRET_KEY });
+    } catch(e) {
+      throw new UnauthorizedException(e.message);
+    }
+  }
+
+  public getPayloadFromToken(token: string): IJwtPayload {
     const {
       id,
       activated,
@@ -47,10 +57,18 @@ export class TokenService {
     };
   }
 
-  public async saveUserRefreshToken(token: string, user: User) {
+  public async saveUserRefreshToken(token: string, userId: string) {
     return await this.refreshTokenModel.create({
       token,
-      user,
+      user: userId,
     });
+  }
+
+  public checkAccessToken(token: string) {
+    try {
+      return this.jwtService.verify(token, { secret: process.env.JWT_SECRET_KEY });
+    } catch (e) {
+      throw new UnauthorizedException('token is not valid');
+    }
   }
 }

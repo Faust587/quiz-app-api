@@ -6,7 +6,6 @@ import {
   Req,
   Res,
   UnauthorizedException,
-  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -14,7 +13,6 @@ import { AuthService } from './auth.service';
 import { RegistrationUserDto } from './DTO/registration-user.dto';
 import { Request, Response } from 'express';
 import { UserLoginDto } from './DTO/user-login.dto';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -56,16 +54,11 @@ export class AuthController {
   @Get('/refresh')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const { refreshToken } = req.cookies;
-    if (!refreshToken) throw new UnauthorizedException("There is no refresh token in cookies");
+    if (!refreshToken) throw new UnauthorizedException('There is no refresh token in cookies');
+
     const tokensPair = await this.authService.refreshToken(refreshToken);
     res.clearCookie('refreshToken');
     res.cookie('refreshToken', tokensPair.refreshToken);
     res.json({ accessToken: tokensPair.accessToken });
-  }
-
-  @Get("/test")
-  @UseGuards(AuthGuard())
-  async test() {
-    return "OK"
   }
 }

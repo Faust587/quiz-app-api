@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { User } from '../user/user.schema';
-import { Question } from './question.schema';
+import { User } from '../user/model/user.schema';
+import { Question } from '../question/question.schema';
 
 export type QuizDocument = HydratedDocument<Quiz>;
 
@@ -12,15 +12,29 @@ export class Quiz {
     ref: User.name,
     required: true,
   })
-  author: User;
+  author: string;
 
   @Prop({
     required: true,
+    type: String
   })
   name: string;
 
   @Prop({
     required: true,
+    type: Boolean
+  })
+  closed: boolean;
+
+  @Prop({
+    required: true,
+    type: Boolean
+  })
+  onlyAuthUsers: boolean;
+
+  @Prop({
+    required: true,
+    type: String,
     unique: true,
   })
   code: string;
@@ -30,7 +44,7 @@ export class Quiz {
     ref: Question.name,
     required: false,
   })
-  questions: Question[];
+  questions: string[];
 }
 
 export const QuizSchema = SchemaFactory.createForClass(Quiz);
