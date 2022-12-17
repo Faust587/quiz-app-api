@@ -8,8 +8,5 @@ export class CreateQuizDto {
   name: string;
 
   @IsBoolean()
-  closed: boolean;
-
-  @IsBoolean()
   onlyAuthUsers: boolean;
 }

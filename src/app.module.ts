@@ -5,6 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { TokenModule } from './token/token.module';
 import { QuizModule } from './quiz/quiz.module';
+import { QuizAnswerModule } from './quiz-answer/quiz-answer.module';
+import { QuestionModule } from './question/question.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { QuizModule } from './quiz/quiz.module';
     AuthModule,
     TokenModule,
     QuizModule,
+    QuizAnswerModule,
+    QuestionModule,
   ],
 })
 export class AppModule {

@@ -5,6 +5,8 @@ import { UserLoginDto } from './DTO/user-login.dto';
 import { IJwtPayload } from './jwt-payload.interface';
 import { compare } from 'bcrypt';
 import { TokenService } from '../token/token.service';
+import { TTokensPair } from '../token/types/tokens-pair.type';
+import { TUserAuth } from './types/user-auth.type';
 
 @Injectable()
 export class AuthService {
@@ -13,10 +15,10 @@ export class AuthService {
     private tokenService: TokenService,
   ) {}
 
-  async userRegistration(registrationUserDto: RegistrationUserDto) {
+  public async userRegistration(registrationUserDto: RegistrationUserDto): Promise<TUserAuth> {
     const user = await this.userService.createUser(registrationUserDto);
     const payload: IJwtPayload = {
-      id: user._id.toString(),
+      id: user.id.toString(),
       activated: false,
     };
 
@@ -25,7 +27,7 @@ export class AuthService {
       refreshToken,
     } = this.tokenService.generateTokensPair(payload);
 
-    await this.tokenService.saveUserRefreshToken(refreshToken, user);
+    await this.tokenService.saveUserRefreshToken(refreshToken, user.id);
 
     return {
       refreshToken,
@@ -34,7 +36,7 @@ export class AuthService {
     };
   }
 
-  async userLogin(userLoginDto: UserLoginDto) {
+  public async userLogin(userLoginDto: UserLoginDto): Promise<TUserAuth> {
     const {
       username,
       password,
@@ -46,7 +48,7 @@ export class AuthService {
     if (!compareResult) throw new ForbiddenException('Password is not correct');
 
     const payload: IJwtPayload = {
-      id: user._id.toString(),
+      id: user.id.toString(),
       activated: false,
     };
 
@@ -55,7 +57,8 @@ export class AuthService {
       refreshToken,
     } = this.tokenService.generateTokensPair(payload);
 
-    await this.tokenService.saveUserRefreshToken(refreshToken, user);
+
+    await this.tokenService.saveUserRefreshToken(refreshToken, user.id);
 
     return {
       refreshToken,
@@ -64,7 +67,8 @@ export class AuthService {
     };
   }
 
-  async refreshToken(token: string) {
+  public async refreshToken(token: string): Promise<TTokensPair> {
+    this.tokenService.checkRefreshToken(token);
     const isTokenExistsInDb = await this.tokenService.isRefreshTokenExists(token);
     if (!isTokenExistsInDb) throw new UnauthorizedException("Token is not exists in db");
     await this.tokenService.deleteRefreshTokenByToken(token);
@@ -72,7 +76,7 @@ export class AuthService {
     const user = await this.userService.getUserById(payload.id);
     if (!user) throw new NotFoundException('This user is not exists');
     const tokensPair = this.tokenService.generateTokensPair(payload);
-    await this.tokenService.saveUserRefreshToken(tokensPair.refreshToken, user);
+    await this.tokenService.saveUserRefreshToken(tokensPair.refreshToken, user.id);
     return tokensPair;
   }
 }

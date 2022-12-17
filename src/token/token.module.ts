@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TokenService } from './token.service';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { RefreshTokenSchema, RefreshToken } from './token.schema';
+import { RefreshTokenSchema, RefreshToken } from './model/token.schema';
 
 @Module({
   imports: [

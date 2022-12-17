@@ -1,30 +1,28 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
-import { QuestionType } from './question-type.schema';
+import { HydratedDocument } from 'mongoose';
 
 export type QuestionDocument = HydratedDocument<Question>;
 
 @Schema()
 export class Question {
-  @Prop()
-  id: string;
-
   @Prop({
-    type: Types.ObjectId,
-    ref: QuestionType.name,
     required: true,
   })
-  questionType: QuestionType;
+  type: string;
 
   @Prop({
-    required: true,
+    required: false,
   })
   value: string[];
 
-  @Prop()
+  @Prop({
+    default: false,
+  })
   isRequired: boolean;
 
-  @Prop()
+  @Prop({
+    required: true,
+  })
   name: string;
 }
 
