@@ -7,6 +7,7 @@ import { TokenModule } from './token/token.module';
 import { QuizModule } from './quiz/quiz.module';
 import { QuizAnswerModule } from './quiz-answer/quiz-answer.module';
 import { QuestionModule } from './question/question.module';
+import { QuizIconModule } from './quiz-icon/quiz-icon.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { QuestionModule } from './question/question.module';
     QuizModule,
     QuizAnswerModule,
     QuestionModule,
+    QuizIconModule,
   ],
 })
 export class AppModule {
