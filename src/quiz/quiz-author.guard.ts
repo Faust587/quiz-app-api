@@ -17,7 +17,7 @@ export class QuizAuthorGuard implements CanActivate {
     const { code } = request.query;
     const quiz = await this.quizService.getQuizByCode(code);
     if (quiz === null)
-      throw new NotFoundException(`Quiz with code: ${ code } is not exists`);
+      throw new NotFoundException(`Quiz with code: ${ code } does not exists`);
     if (quiz.author !== id)
       throw new ForbiddenException('You are not the author of this quiz');
     return true;
