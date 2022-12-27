@@ -65,8 +65,9 @@ export class TokenService {
   }
 
   public checkAccessToken(token: string) {
+    const accessToken = token.split('Bearer ')[1];
     try {
-      return this.jwtService.verify(token, { secret: process.env.JWT_SECRET_KEY });
+      return this.jwtService.verify(accessToken, { secret: process.env.JWT_SECRET_KEY });
     } catch (e) {
       throw new UnauthorizedException('token is not valid');
     }
