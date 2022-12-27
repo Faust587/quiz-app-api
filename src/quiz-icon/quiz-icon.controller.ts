@@ -1,16 +1,26 @@
-import { Controller, Get, Header, StreamableFile } from '@nestjs/common';
-import { createReadStream } from 'fs';
-import { join } from 'path';
+import { BadRequestException, Controller, Get, InternalServerErrorException, Param, Req, Res } from '@nestjs/common';
+import {readFile, readdir} from 'fs';
+import { Request, Response } from 'express';
 
 @Controller('quiz-icon')
 export class QuizIconController {
   constructor() {}
 
-  @Get()
-  @Header('Content-Type', 'image/svg+xml')
-  @Header('Content-Disposition', 'attachment; filename="icon.svg"')
-  getStaticFile(): StreamableFile {
-    const file = createReadStream(join(process.cwd(), 'src/data/images/1054940_video camera_icon.svg'));
-    return new StreamableFile(file);
+  @Get('/list')
+  async getIconsList(@Req() req: Request, @Res() res: Response) {
+    const { host } = req.headers;
+    readdir('./src/data/images/', (err, files) => {
+      if (err) throw new InternalServerErrorException('Server error');
+      const iconsURL = files.map(icon => `http://${ host }/quiz-icon/${ icon }`);
+      res.json({ icons: iconsURL });
+    });
+  }
+
+  @Get('/:iconName')
+  async getIconByName(@Res() res: Response, @Param('iconName') iconName: string) {
+    readFile(`./src/data/images/${ iconName }`, { encoding: 'utf8' }, (err, data) => {
+      if (err) res.send(new BadRequestException('Icon name is not valid'));
+      res.send(data);
+    });
   }
 }
