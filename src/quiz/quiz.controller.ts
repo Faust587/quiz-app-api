@@ -117,11 +117,17 @@ export class QuizController {
     const quiz = await this.quizService.getQuizByCode(code);
     if (!quiz) throw new BadRequestException('quiz with this code is not exists');
     if (!quiz.onlyAuthUsers) return quiz;
-    if (quiz.closed) throw new NotAcceptableException('This quiz is closed by author');
+
 
     const { authorization } = req.headers;
     if (!authorization) throw new UnauthorizedException('This quiz only for registered users');
-    this.tokenService.checkAccessToken(authorization);
+    const accessToken = authorization.split('Bearer ')[1];
+    this.tokenService.checkAccessToken(accessToken);
+    const { id } = this.tokenService.getPayloadFromToken(accessToken);
+    if (quiz.author === id) return quiz;
+
+    if (quiz.closed) throw new NotAcceptableException('This quiz is closed by author');
+
     return quiz;
   }
 }

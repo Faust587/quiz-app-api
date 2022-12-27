@@ -5,7 +5,20 @@ import { Question } from '../question/question.schema';
 
 export type QuizDocument = HydratedDocument<Quiz>;
 
-@Schema()
+@Schema({
+  toJSON: {
+    transform: (doc, ret) => {
+      ret.id = ret._id;
+      delete ret._id;
+    },
+  },
+  toObject: {
+    transform: (doc, ret) => {
+      ret.id = ret._id.toHexString();
+      delete ret._id;
+    },
+  },
+})
 export class Quiz {
   @Prop({
     type: Types.ObjectId,

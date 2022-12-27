@@ -29,6 +29,7 @@ export class QuizService {
       author: authorId,
       closed: false,
       onlyAuthUsers,
+      questions: []
     });
   }
 
