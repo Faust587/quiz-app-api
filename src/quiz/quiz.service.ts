@@ -15,7 +15,7 @@ export class QuizService {
     @InjectModel(Question.name) private questionModel: Model<QuestionDocument>,
     private codeGeneratorService: CodeGeneratorService,
     private questionService: QuestionService,
-  ) {}
+  ) { }
 
   public async createQuiz(createQuizDto: CreateQuizDto, authorId: string) {
     const {
@@ -36,7 +36,7 @@ export class QuizService {
   public async refreshQuizCode(quizCode: string) {
     const code = await this.codeGeneratorService.getCode(6);
     return this.quizModel.findOneAndUpdate({ code: quizCode }, { code }, { new: true })
-      .select([ '_id', 'name', 'onlyAuthUsers', 'code', 'closed' ]);
+      .select(['_id', 'name', 'onlyAuthUsers', 'code', 'closed', 'questions', 'author']);
   }
 
   public async updateQuizParameters(quizCode: string, onlyAuthUsers?: boolean, closed?: boolean, name?: string) {
@@ -45,7 +45,7 @@ export class QuizService {
       closed,
       name
     }, { new: true })
-      .select([ '_id', 'name', 'onlyAuthUsers', 'code', 'closed' ]);
+      .select(['_id', 'name', 'onlyAuthUsers', 'code', 'closed', 'questions', 'author']);
   }
 
   /**
@@ -67,12 +67,28 @@ export class QuizService {
   }
 
   public async getAllQuizzesByAuthor(authorId: string) {
-    return this.quizModel.find({ author: authorId }).select([ '_id', 'name', 'onlyAuthUsers', 'code', 'closed' ]);
+    return this.quizModel.find({ author: authorId }).select(['_id', 'name', 'onlyAuthUsers', 'code', 'closed']);
   }
 
   public async getQuizByCode(code: string) {
     const quiz = await this.quizModel.findOne({ code });
     if (!quiz) throw new BadRequestException('quiz with this code is not exists');
+    const questionIds = quiz.questions;
+    const questions = await this.questionService.getQuestionsByIds(questionIds);
+    return {
+      id: quiz.id,
+      name: quiz.name,
+      closed: quiz.closed,
+      onlyAuthUsers: quiz.onlyAuthUsers,
+      code: quiz.code,
+      author: quiz.author,
+      questions,
+    };
+  }
+
+  public async getQuizById(id: string) {
+    const quiz = await this.quizModel.findById(id);
+    if (!quiz) throw new BadRequestException('quiz does not exists');
     const questionIds = quiz.questions;
     const questions = await this.questionService.getQuestionsByIds(questionIds);
     return {

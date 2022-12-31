@@ -12,10 +12,11 @@ export class QuizAuthorGuard implements CanActivate {
     context: ExecutionContext,
   ): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-
     const { id } = request.user as IJwtPayload;
     const { code } = request.query;
-    const quiz = await this.quizService.getQuizByCode(code);
+
+    const quizId = request.params.id;
+    const quiz = code ? await this.quizService.getQuizByCode(code) : await this.quizService.getQuizById(quizId);
     if (quiz === null)
       throw new NotFoundException(`Quiz with code: ${ code } does not exists`);
     if (quiz.author !== id)

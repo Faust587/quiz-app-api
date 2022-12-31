@@ -4,7 +4,7 @@ import {
   Controller,
   Delete,
   Get,
-  NotAcceptableException,
+  NotAcceptableException, Param,
   Post,
   Put,
   Query,
@@ -96,18 +96,6 @@ export class QuizController {
     return await this.quizService.getAllQuizzesByAuthor(id);
   }
 
-  @Post('/test')
-  @UseGuards(QuizAuthorGuard)
-  @UseGuards(AuthGuard())
-  @UsePipes(ValidationPipe)
-  async test(
-    @Query('code') code: string,
-    @Body() addQuestionDto: AddQuestionsDto,
-  ) {
-    const { questions } = addQuestionDto;
-    return this.questionService.createQuestions(questions);
-  }
-
   @Get()
   @UsePipes(ValidationPipe)
   async getQuiz(
@@ -116,17 +104,38 @@ export class QuizController {
   ) {
     const quiz = await this.quizService.getQuizByCode(code);
     if (!quiz) throw new BadRequestException('quiz with this code is not exists');
-    if (!quiz.onlyAuthUsers) return quiz;
-
 
     const { authorization } = req.headers;
     if (!authorization) throw new UnauthorizedException('This quiz only for registered users');
     const accessToken = authorization.split('Bearer ')[1];
-    this.tokenService.checkAccessToken(accessToken);
     const { id } = this.tokenService.getPayloadFromToken(accessToken);
     if (quiz.author === id) return quiz;
 
     if (quiz.closed) throw new NotAcceptableException('This quiz is closed by author');
+    if (!quiz.onlyAuthUsers) return quiz;
+    this.tokenService.checkAccessToken(accessToken);
+
+    return quiz;
+  }
+
+  @Get(":id")
+  @UseGuards(AuthGuard())
+  async getQuizById(
+    @Req() req: Request,
+    @Param("id") quizId: string,
+  ) {
+    const quiz = await this.quizService.getQuizById(quizId);
+    if (!quiz) throw new BadRequestException('quiz with this code is not exists');
+
+    const { authorization } = req.headers;
+    if (!authorization) throw new UnauthorizedException('This quiz only for registered users');
+    const accessToken = authorization.split('Bearer ')[1];
+    const { id } = this.tokenService.getPayloadFromToken(accessToken);
+    if (quiz.author === id) return quiz;
+
+    if (quiz.closed) throw new NotAcceptableException('This quiz is closed by author');
+    if (!quiz.onlyAuthUsers) return quiz;
+    this.tokenService.checkAccessToken(accessToken);
 
     return quiz;
   }
