@@ -3,7 +3,20 @@ import { HydratedDocument } from 'mongoose';
 
 export type QuestionDocument = HydratedDocument<Question>;
 
-@Schema()
+@Schema({
+  toJSON: {
+    transform: (doc, ret) => {
+      ret.id = ret._id;
+      delete ret._id;
+    },
+  },
+  toObject: {
+    transform: (doc, ret) => {
+      ret.id = ret._id.toHexString();
+      delete ret._id;
+    },
+  },
+})
 export class Question {
   @Prop({
     required: true,
@@ -24,6 +37,11 @@ export class Question {
     required: true,
   })
   name: string;
+
+  @Prop({
+    required: true,
+  })
+  index: number;
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(Question);

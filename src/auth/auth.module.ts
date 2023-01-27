@@ -18,9 +18,8 @@ import { TokenModule } from '../token/token.module';
       defaultStrategy: 'jwt',
     }),
   ],
-  providers: [ AuthService, JwtStrategy, JwtService ],
-  controllers: [ AuthController ],
-  exports: [ JwtStrategy, PassportModule ],
+  providers: [AuthService, JwtStrategy, JwtService],
+  controllers: [AuthController],
+  exports: [JwtStrategy, PassportModule],
 })
-export class AuthModule {
-}
+export class AuthModule {}

@@ -7,13 +7,14 @@ import { RefreshTokenSchema, RefreshToken } from './model/token.schema';
 @Module({
   imports: [
     JwtModule,
-    MongooseModule.forFeature([ {
-      name: RefreshToken.name,
-      schema: RefreshTokenSchema,
-    } ]),
+    MongooseModule.forFeature([
+      {
+        name: RefreshToken.name,
+        schema: RefreshTokenSchema,
+      },
+    ]),
   ],
-  providers: [ TokenService ],
-  exports: [ TokenService ],
+  providers: [TokenService],
+  exports: [TokenService],
 })
-export class TokenModule {
-}
+export class TokenModule {}

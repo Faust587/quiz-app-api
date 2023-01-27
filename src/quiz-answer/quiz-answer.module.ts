@@ -19,10 +19,9 @@ import { AuthModule } from '../auth/auth.module';
     QuizModule,
     TokenModule,
     QuestionModule,
-    AuthModule
+    AuthModule,
   ],
-  providers: [ QuizAnswerService ],
-  controllers: [ QuizAnswerController ],
+  providers: [QuizAnswerService],
+  controllers: [QuizAnswerController],
 })
-export class QuizAnswerModule {
-}
+export class QuizAnswerModule {}

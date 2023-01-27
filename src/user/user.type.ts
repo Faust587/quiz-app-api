@@ -4,4 +4,4 @@ export type TUser = {
   email: string;
   password: string;
   activated: boolean;
-}
+};

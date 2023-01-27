@@ -2,7 +2,8 @@ import { registerDecorator, ValidationOptions } from 'class-validator';
 import { Types } from 'mongoose';
 
 export function IsQuestionId(validationOptions?: ValidationOptions) {
-  return function(object: Object, propertyName: string) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  return function (object: Object, propertyName: string) {
     registerDecorator({
       name: 'IsQuestionId',
       target: object.constructor,

@@ -5,11 +5,11 @@ import { Quiz, QuizDocument } from './quiz.schema';
 
 @Injectable()
 export class CodeGeneratorService {
-  constructor(
-    @InjectModel(Quiz.name) private quizModel: Model<QuizDocument>,
-  ) {}
+  constructor(@InjectModel(Quiz.name) private quizModel: Model<QuizDocument>) {}
 
-  private SYMBOLS = [ ...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890' ];
+  private SYMBOLS = [
+    ...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890',
+  ];
 
   public async getCode(size: number) {
     let code = this.generateCode(size);
@@ -33,11 +33,11 @@ export class CodeGeneratorService {
   }
 
   private async checkCodeIsUnique(code: string) {
-    return !await this.quizModel.findOne({ code });
+    return !(await this.quizModel.findOne({ code }));
   }
 
   private getRandomInteger() {
-    let rand = Math.random() * ( this.SYMBOLS.length );
+    const rand = Math.random() * this.SYMBOLS.length;
     return Math.floor(rand);
   }
 }

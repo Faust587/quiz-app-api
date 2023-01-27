@@ -29,21 +29,33 @@ export class Quiz {
 
   @Prop({
     required: true,
-    type: String
+    type: String,
   })
   name: string;
 
   @Prop({
     required: true,
-    type: Boolean
+    type: Boolean,
   })
   closed: boolean;
 
   @Prop({
     required: true,
-    type: Boolean
+    type: Boolean,
   })
   onlyAuthUsers: boolean;
+
+  @Prop({
+    required: true,
+    type: String,
+  })
+  iconURL: string;
+
+  @Prop({
+    required: true,
+    type: Number,
+  })
+  lastUpdated: number;
 
   @Prop({
     required: true,

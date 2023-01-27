@@ -5,4 +5,4 @@ export type TUserAuth = {
   user: TUser;
   accessToken: string;
   refreshToken: string;
-}
+};

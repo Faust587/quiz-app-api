@@ -9,14 +9,14 @@ export type UserDocument = HydratedDocument<User>;
     transform: (doc, ret) => {
       ret.id = ret._id;
       delete ret._id;
-    }
+    },
   },
   toObject: {
     transform: (doc, ret) => {
       ret.id = ret._id.toHexString();
       delete ret._id;
-    }
-  }
+    },
+  },
 })
 export class User {
   @Prop({ required: true })

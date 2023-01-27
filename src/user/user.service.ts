@@ -1,4 +1,8 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './model/user.schema';
 import { Model } from 'mongoose';
@@ -11,12 +15,10 @@ import { TUser } from './user.type';
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  public async createUser(registrationUserDto: RegistrationUserDto): Promise<TUser> {
-    const {
-      username,
-      password,
-      email,
-    } = registrationUserDto;
+  public async createUser(
+    registrationUserDto: RegistrationUserDto,
+  ): Promise<TUser> {
+    const { username, password, email } = registrationUserDto;
 
     const errors: string[] = [];
 
@@ -32,7 +34,12 @@ export class UserService {
 
     const salt = await genSalt();
     const hashedPassword = await this.hashPassword(password, salt);
-    const createUserDTO = new CreateUserDto(username, email, hashedPassword, salt);
+    const createUserDTO = new CreateUserDto(
+      username,
+      email,
+      hashedPassword,
+      salt,
+    );
 
     const user = await this.userModel.create(createUserDTO);
     return {
@@ -73,10 +80,10 @@ export class UserService {
   }
 
   private async checkUsernameExists(username: string): Promise<boolean> {
-    return !!await this.userModel.findOne({ username });
+    return !!(await this.userModel.findOne({ username }));
   }
 
   private async checkEmailExists(email: string): Promise<boolean> {
-    return !!await this.userModel.findOne({ email });
+    return !!(await this.userModel.findOne({ email }));
   }
 }

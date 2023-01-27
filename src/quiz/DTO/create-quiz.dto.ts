@@ -1,4 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateQuizDto {
   @IsString()
@@ -8,4 +14,7 @@ export class CreateQuizDto {
 
   @IsBoolean()
   onlyAuthUsers: boolean;
+
+  @IsString()
+  iconURL: string;
 }

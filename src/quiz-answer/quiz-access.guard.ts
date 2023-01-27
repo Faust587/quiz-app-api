@@ -1,4 +1,9 @@
-import { BadRequestException, CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+} from '@nestjs/common';
 import { QuizService } from '../quiz/quiz.service';
 import { TokenService } from '../token/token.service';
 
@@ -17,10 +22,9 @@ export class QuizAccessGuard implements CanActivate {
     request.user = this.tokenService.getPayloadFromToken(token);
     const { code } = request.query;
     if (!code) throw new BadRequestException('Code is undefined');
-    const {
-      onlyAuthUsers,
-      closed,
-    } = await this.quizService.getQuizByCode(code);
+    const { onlyAuthUsers, closed } = await this.quizService.getQuizByCode(
+      code,
+    );
     if (closed) return false;
     if (!onlyAuthUsers) return true;
     if (!authorization) return false;

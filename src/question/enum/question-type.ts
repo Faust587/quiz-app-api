@@ -1,6 +1,6 @@
 export enum QuestionType {
-  TEXT = "TEXT",
-  FLAG = "FLAG",
-  OPTION = "OPTION",
-  SELECT = "SELECT"
+  TEXT = 'TEXT',
+  FLAG = 'FLAG',
+  OPTION = 'OPTION',
+  SELECT = 'SELECT',
 }

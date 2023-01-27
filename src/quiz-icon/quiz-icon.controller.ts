@@ -1,26 +1,21 @@
-import { BadRequestException, Controller, Get, InternalServerErrorException, Param, Req, Res } from '@nestjs/common';
-import {readFile, readdir} from 'fs';
+import {
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
+import { QuizIconService } from './quiz-icon.service';
 
 @Controller('quiz-icon')
 export class QuizIconController {
-  constructor() {}
-
+  constructor(private quizIconService: QuizIconService) {}
   @Get('/list')
   async getIconsList(@Req() req: Request, @Res() res: Response) {
     const { host } = req.headers;
-    readdir('./src/data/images/', (err, files) => {
-      if (err) throw new InternalServerErrorException('Server error');
-      const iconsURL = files.map(icon => `http://${ host }/quiz-icon/${ icon }`);
-      res.json({ icons: iconsURL });
-    });
-  }
-
-  @Get('/:iconName')
-  async getIconByName(@Res() res: Response, @Param('iconName') iconName: string) {
-    readFile(`./src/data/images/${ iconName }`, { encoding: 'utf8' }, (err, data) => {
-      if (err) res.send(new BadRequestException('Icon name is not valid'));
-      res.send(data);
-    });
+    if (!host) throw new InternalServerErrorException('HOST IS UNDEFINED');
+    const icons = await this.quizIconService.getIconsList(host);
+    res.json({ icons });
   }
 }

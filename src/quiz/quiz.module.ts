@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { QuizService } from './quiz.service';
 import { QuizController } from './quiz.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -8,6 +8,7 @@ import { Quiz, QuizSchema } from './quiz.schema';
 import { TokenModule } from '../token/token.module';
 import { Question, QuestionSchema } from '../question/question.schema';
 import { QuestionModule } from '../question/question.module';
+import { QuizIconModule } from '../quiz-icon/quiz-icon.module';
 
 @Module({
   imports: [
@@ -23,11 +24,11 @@ import { QuestionModule } from '../question/question.module';
     ]),
     AuthModule,
     TokenModule,
-    QuestionModule,
+    QuizIconModule,
+    forwardRef(() => QuestionModule),
   ],
-  providers: [ QuizService, CodeGeneratorService ],
-  controllers: [ QuizController ],
-  exports: [ QuizService ],
+  providers: [QuizService, CodeGeneratorService],
+  controllers: [QuizController],
+  exports: [QuizService],
 })
-export class QuizModule {
-}
+export class QuizModule {}

@@ -4,7 +4,6 @@ import { Prop, Schema } from '@nestjs/mongoose';
   versionKey: true,
 })
 export class Answer {
-
   @Prop({ required: true })
   questionId: string;
 
@@ -22,7 +21,7 @@ export class Answer {
 
   @Prop({
     required: false,
-    type: [ Number ],
+    type: [Number],
   })
   answerArrInt: number[];
 }

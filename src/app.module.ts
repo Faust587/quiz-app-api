@@ -13,7 +13,7 @@ import { QuizIconModule } from './quiz-icon/quiz-icon.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     UserModule,
-    MongooseModule.forRoot(`${ process?.env.MONGO_DB_URI }`),
+    MongooseModule.forRoot(`${process.env.MONGO_DB_URI}`),
     AuthModule,
     TokenModule,
     QuizModule,
@@ -22,5 +22,4 @@ import { QuizIconModule } from './quiz-icon/quiz-icon.module';
     QuizIconModule,
   ],
 })
-export class AppModule {
-}
+export class AppModule {}

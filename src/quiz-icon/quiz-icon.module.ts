@@ -4,6 +4,7 @@ import { QuizIconService } from './quiz-icon.service';
 
 @Module({
   controllers: [QuizIconController],
-  providers: [QuizIconService]
+  providers: [QuizIconService],
+  exports: [QuizIconService],
 })
 export class QuizIconModule {}

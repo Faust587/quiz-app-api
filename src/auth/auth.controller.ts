@@ -16,18 +16,16 @@ import { UserLoginDto } from './DTO/user-login.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Post('/register')
   @UsePipes(ValidationPipe)
-  async registration(@Res() res: Response, @Body() registrationUserDto: RegistrationUserDto) {
-    const {
-      refreshToken,
-      accessToken,
-      user,
-    } = await this.authService.userRegistration(registrationUserDto);
+  async registration(
+    @Res() res: Response,
+    @Body() registrationUserDto: RegistrationUserDto,
+  ) {
+    const { refreshToken, accessToken, user } =
+      await this.authService.userRegistration(registrationUserDto);
     res.cookie('refreshToken', refreshToken);
     res.json({
       user,
@@ -38,11 +36,8 @@ export class AuthController {
   @Post('/login')
   @UsePipes(ValidationPipe)
   async login(@Res() res: Response, @Body() userLoginDto: UserLoginDto) {
-    const {
-      user,
-      accessToken,
-      refreshToken,
-    } = await this.authService.userLogin(userLoginDto);
+    const { user, accessToken, refreshToken } =
+      await this.authService.userLogin(userLoginDto);
 
     res.cookie('refreshToken', refreshToken);
     res.json({
@@ -54,7 +49,8 @@ export class AuthController {
   @Get('/refresh')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const { refreshToken } = req.cookies;
-    if (!refreshToken) throw new UnauthorizedException('There is no refresh token in cookies');
+    if (!refreshToken)
+      throw new UnauthorizedException('There is no refresh token in cookies');
 
     const tokensPair = await this.authService.refreshToken(refreshToken);
     res.clearCookie('refreshToken');
