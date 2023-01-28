@@ -17,9 +17,11 @@ export class QuizAccessGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const { authorization } = request.headers;
-    const token = authorization.split(' ')[1];
-    this.tokenService.checkAccessToken(token);
-    request.user = this.tokenService.getPayloadFromToken(token);
+    if (authorization) {
+      const token = authorization.split(' ')[1];
+      this.tokenService.checkAccessToken(token);
+      request.user = this.tokenService.getPayloadFromToken(token);
+    }
     const { code } = request.query;
     if (!code) throw new BadRequestException('Code is undefined');
     const { onlyAuthUsers, closed } = await this.quizService.getQuizByCode(
@@ -27,7 +29,6 @@ export class QuizAccessGuard implements CanActivate {
     );
     if (closed) return false;
     if (!onlyAuthUsers) return true;
-    if (!authorization) return false;
-    return true;
+    return authorization;
   }
 }

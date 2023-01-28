@@ -1,7 +1,9 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
+
+export type AnswerDocument = HydratedDocument<Answer>;
 
 @Schema({
-  versionKey: true,
   toJSON: {
     transform: (doc, ret) => {
       ret.id = ret._id;
@@ -59,3 +61,5 @@ export class Answer {
   })
   answerArrInt: number[];
 }
+
+export const AnswerSchema = SchemaFactory.createForClass(Answer);

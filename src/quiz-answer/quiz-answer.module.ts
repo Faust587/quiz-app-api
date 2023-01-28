@@ -7,6 +7,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { QuizAnswer, QuizAnswerSchema } from './model/quiz-answer.schema';
 import { QuestionModule } from '../question/question.module';
 import { AuthModule } from '../auth/auth.module';
+import { Answer, AnswerSchema } from './model/answer.schema';
 
 @Module({
   imports: [
@@ -14,6 +15,10 @@ import { AuthModule } from '../auth/auth.module';
       {
         name: QuizAnswer.name,
         schema: QuizAnswerSchema,
+      },
+      {
+        name: Answer.name,
+        schema: AnswerSchema,
       },
     ]),
     QuizModule,

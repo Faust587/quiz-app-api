@@ -27,6 +27,12 @@ export class QuizAnswer {
 
   @Prop({ required: true })
   answers: string[];
+
+  @Prop({
+    required: true,
+    type: Number,
+  })
+  answeredAt: number;
 }
 
 export const QuizAnswerSchema = SchemaFactory.createForClass(QuizAnswer);
