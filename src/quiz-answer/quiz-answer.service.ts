@@ -8,25 +8,17 @@ import { Model } from 'mongoose';
 import { QuizAnswer, QuizAnswerDocument } from './model/quiz-answer.schema';
 import { AnswerDto } from './DTO/answer.dto';
 import { QuizService } from '../quiz/quiz.service';
-import { difference, forEach } from 'lodash';
 import { QuestionType } from '../question/enum/question-type';
-
-type TFullAnswerWithQuestion = {
-  id: string;
-  type: QuestionType;
-  value?: string[];
-  isRequired: boolean;
-  name: string;
-  answerText?: string;
-  answerInt?: number;
-  answerArrInt?: number[];
-};
+import { isNumber } from 'lodash';
+import { Answer, AnswerDocument } from './model/answer.schema';
 
 @Injectable()
 export class QuizAnswerService {
   constructor(
     @InjectModel(QuizAnswer.name)
     private quizAnswerModel: Model<QuizAnswerDocument>,
+    @InjectModel(Answer.name)
+    private answerModel: Model<AnswerDocument>,
     private quizService: QuizService,
   ) {}
 
@@ -42,81 +34,92 @@ export class QuizAnswerService {
     quizCode: string,
     authorId?: string,
   ) {
-    /*const quiz = await this.quizService.getQuizByCode(quizCode);
-    if (!quiz)
-      throw new BadRequestException(
-        'the answered questions do not match the original questions',
+    const { questions, id } = await this.quizService.getQuizByCode(quizCode);
+    const answersIds: string[] = [];
+    for (const question of questions) {
+      const answer = answers.find(
+        (answer) => answer.questionId === question.id,
       );
-    const questions = quiz.questions;
-    const quizId = quiz.id;
-    const answersIds = answers.map((answer) => answer.id);
-    const questionIds = questions.map((question) => question?.id);
-    const isSame = !difference(answersIds, questionIds).length;
-    if (!isSame)
-      throw new BadRequestException(
-        'the answered questions do not match the original questions',
-      );
-    const fullAnswerObj: TFullAnswerWithQuestion[] = [];
-    for (let i = 0; i < answers.length; i++) {
-      const question = questions.find(
-        (question) => question.id === answers[i].id,
-      );
-      if (!question) throw new InternalServerErrorException();
-      fullAnswerObj.push({
-        ...answers[i],
-        type: question.type,
-        value: question.value,
-        isRequired: question.isRequired,
-        name: question.name,
-      });
-    }
-    fullAnswerObj.forEach((answer, index) => {
-      const { type, isRequired } = answer;
-      switch (type) {
-        case QuestionType.TEXT: {
-          if (!answer.answerText && isRequired)
+      if (!answer)
+        throw new BadRequestException({
+          type: 'NO_ANSWER',
+          message: `THERE IS NO ANSWER TO QUESTION`,
+        });
+      if (question.isRequired) {
+        switch (question.type) {
+          case QuestionType.FLAG: {
+            if (!answer.answerArrInt.length)
+              throw new BadRequestException(
+                `answer for question ${question.index} is required!`,
+              );
+            break;
+          }
+          case QuestionType.SELECT:
+          case QuestionType.OPTION: {
+            if (!isNumber(answer.answerInt) || answer.answerInt < 0)
+              throw new BadRequestException(
+                `answer for question ${question.index} is required!`,
+              );
+            break;
+          }
+          case QuestionType.TEXT: {
+            if (
+              typeof answer.answerText !== 'string' ||
+              answer.answerText.length === 0
+            )
+              throw new BadRequestException(
+                `answer for question ${question.index} is required!`,
+              );
+            break;
+          }
+          default: {
             throw new BadRequestException(
-              `answer for question [${index}] is required`,
+              `type for this question does not exists`,
             );
-          break;
-        }
-        case QuestionType.OPTION: {
-          if (!answer.answerInt && isRequired)
-            throw new BadRequestException(
-              `answer for question [${index}] is required`,
-            );
-          break;
-        }
-        case QuestionType.FLAG: {
-          if (!answer.answerArrInt?.length && isRequired)
-            throw new BadRequestException(
-              `answer for question [${index}] is required`,
-            );
-          break;
-        }
-        case QuestionType.SELECT: {
-          if (!answer.answerArrInt?.length && isRequired)
-            throw new BadRequestException(
-              `answer for question [${index}] is required`,
-            );
+          }
         }
       }
+      const answerId = await this.createAnswer(
+        question.name,
+        question.type,
+        question.isRequired,
+        question.index,
+        question.value,
+        answer.answerText,
+        answer.answerInt,
+        answer.answerArrInt,
+      );
+      answersIds.push(answerId);
+    }
+    const utc = this.quizService.getCurrentUTC();
+    return this.quizAnswerModel.create({
+      quizId: id,
+      authorId,
+      answers: answersIds,
+      answeredAt: utc,
     });
+  }
 
-    const answersData = fullAnswerObj.map((answer) => {
-      const { answerText, answerInt, answerArrInt, id } = answer;
-      return {
-        id,
-        answerText,
-        answerInt,
-        answerArrInt,
-      };
+  private async createAnswer(
+    name: string,
+    type: string,
+    isRequired: boolean,
+    index: number,
+    value: string[] = [],
+    answerText = '',
+    answerInt: number | null = null,
+    answerArrInt: number[] = [],
+  ): Promise<string> {
+    const answer = await this.answerModel.create({
+      name,
+      type,
+      isRequired,
+      index,
+      value,
+      answerText,
+      answerInt,
+      answerArrInt,
     });
-
-    return await this.quizAnswerModel.create({
-      quizId,
-      authorId: authorId,
-      answers: answersData,
-    });*/
+    return answer.id;
   }
 }

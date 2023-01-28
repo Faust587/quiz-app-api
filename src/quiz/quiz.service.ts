@@ -179,11 +179,13 @@ export class QuizService {
     });
     return this.getQuizById(quizId);
   }
-  private getCurrentUTC() {
+  public getCurrentUTC() {
     const date = new Date();
     const year = date.getFullYear();
     const month = date.getMonth();
     const day = date.getDate();
-    return Date.UTC(year, month, day);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    return Date.UTC(year, month, day, hours, minutes);
   }
 }

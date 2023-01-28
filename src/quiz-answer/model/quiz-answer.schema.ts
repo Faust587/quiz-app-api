@@ -1,6 +1,5 @@
 import { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Answer } from './answer.schema';
 
 export type QuizAnswerDocument = HydratedDocument<QuizAnswer>;
 
@@ -27,7 +26,13 @@ export class QuizAnswer {
   authorId: string;
 
   @Prop({ required: true })
-  answers: Answer[];
+  answers: string[];
+
+  @Prop({
+    required: true,
+    type: Number,
+  })
+  answeredAt: number;
 }
 
 export const QuizAnswerSchema = SchemaFactory.createForClass(QuizAnswer);
