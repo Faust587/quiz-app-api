@@ -30,8 +30,8 @@ export class QuizAnswerController {
     @Body() createQuizAnswerDto: CreateQuizAnswerDto,
   ) {
     const { answers } = createQuizAnswerDto;
-    const id = (req.user as IJwtPayload).id;
-    return await this.quizAnswerService.createQuizAnswer(answers, code, id);
+    const userId = (req.user as IJwtPayload).id;
+    return await this.quizAnswerService.createQuizAnswer(answers, code, userId);
   }
 
   @Get('/list')
