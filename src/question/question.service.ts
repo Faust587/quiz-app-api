@@ -136,6 +136,21 @@ export class QuestionService {
     return data;
   }
 
+  public async getQuestionById(id: string) {
+    const question = await this.questionModel.findById(id);
+    if (!question)
+      throw new BadRequestException(`question with id ${id} does not exists`);
+    return {
+      id: question.id,
+      type: question.type,
+      value: question.value,
+      isRequired: question.isRequired,
+      isFileUploaded: question.isFileUploaded,
+      name: question.name,
+      index: question.index,
+    };
+  }
+
   public async getQuestionsByIds(ids: string[]): Promise<TQuestion[]> {
     const questionsData = await Promise.all(
       ids.map(async (id) => {

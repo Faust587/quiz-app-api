@@ -23,5 +23,8 @@ export class CreateQuestionDto {
   value: string[];
 
   @IsBoolean()
+  isFileUploaded: boolean;
+
+  @IsBoolean()
   isRequired: boolean;
 }

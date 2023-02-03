@@ -3,11 +3,15 @@ import {
   Body,
   Controller,
   Delete,
+  InternalServerErrorException,
   NotAcceptableException,
+  Param,
   Patch,
   Post,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -20,6 +24,8 @@ import { QuestionService } from './question.service';
 import { EditQuestionDto } from './DTO/edit-question.dto';
 import { DeleteQuestionDto } from './DTO/delete-question.dto';
 import { ChangeQuestionOrderDto } from './DTO/change-question-order.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as fs from 'fs';
 
 @Controller('question')
 export class QuestionController {
@@ -27,6 +33,30 @@ export class QuestionController {
     private quizService: QuizService,
     private questionService: QuestionService,
   ) {}
+
+  @Post('upload/:questionId')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('questionId') questionId: string,
+  ) {
+    const question = this.questionService.getQuestionById(questionId);
+    const fileExtension = file.originalname.split('.').pop();
+    const stream = fs.createWriteStream(
+      `src/data/${questionId}.${fileExtension}`,
+    );
+    try {
+      stream.once('open', () => {
+        stream.write(file.buffer);
+        stream.end();
+      });
+    } catch (e) {
+      throw new InternalServerErrorException(
+        `Can not upload file ${file.originalname}`,
+      );
+    }
+    return 'OK';
+  }
 
   @Post()
   @UseGuards(AuthGuard())

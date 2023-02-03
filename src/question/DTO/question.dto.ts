@@ -21,6 +21,9 @@ export class QuestionDto {
   @IsBoolean()
   isRequired: boolean;
 
+  @IsBoolean()
+  isFileUploaded: boolean;
+
   @IsNumber()
   index: number;
 }
