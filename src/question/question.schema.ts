@@ -34,6 +34,11 @@ export class Question {
   isRequired: boolean;
 
   @Prop({
+    default: false,
+  })
+  isFileUploaded: boolean;
+
+  @Prop({
     required: true,
   })
   name: string;
