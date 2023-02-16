@@ -34,12 +34,19 @@ export class QuestionController {
     private questionService: QuestionService,
   ) {}
 
-  @Post('upload/:questionId')
+  @Post('upload/:quizId/:questionId')
+  @UseGuards(AuthGuard())
   @UseInterceptors(FileInterceptor('file'))
-  uploadFile(
+  async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Param('questionId') questionId: string,
+    @Param('quizId') quizId: string,
+    @Req() req: Request,
   ) {
+    const { id } = req.user as IJwtPayload;
+    const quiz = await this.quizService.getQuizById(quizId);
+    if (quiz.author !== id)
+      throw new NotAcceptableException('You are not the author of this quiz');
     const question = this.questionService.getQuestionById(questionId);
     const fileExtension = file.originalname.split('.').pop();
     const stream = fs.createWriteStream(
