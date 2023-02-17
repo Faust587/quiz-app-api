@@ -51,19 +51,11 @@ export class QuestionController {
     const fileExtension = this.questionService.getFileExtensionFromString(
       file.originalname,
     );
-    const stream = fs.createWriteStream(
-      `src/data/${questionId}.${fileExtension}`,
+    this.questionService.createFileForQuestionAttachment(
+      fileExtension,
+      questionId,
+      file,
     );
-    try {
-      stream.once('open', () => {
-        stream.write(file.buffer);
-        stream.end();
-      });
-    } catch (e) {
-      throw new InternalServerErrorException(
-        `Can not upload file ${file.originalname}`,
-      );
-    }
     return 'OK';
   }
 

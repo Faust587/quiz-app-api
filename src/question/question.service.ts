@@ -11,6 +11,7 @@ import { EditQuestionDto } from './DTO/edit-question.dto';
 import { QuestionDto } from './DTO/question.dto';
 import { QuestionType } from './enum/question-type';
 import { Question, QuestionDocument } from './question.schema';
+import * as fs from 'fs';
 
 type TQuestion = {
   id: string;
@@ -232,6 +233,26 @@ export class QuestionService {
 
   public getFileExtensionFromString(str: string): string | undefined {
     return str.split('.').pop();
+  }
+
+  public createFileForQuestionAttachment(
+    fileExtension: string | undefined,
+    questionId: string,
+    file: Express.Multer.File,
+  ) {
+    const stream = fs.createWriteStream(
+      `src/data/${questionId}${fileExtension || ''}`,
+    );
+    try {
+      stream.once('open', () => {
+        stream.write(file.buffer);
+        stream.end();
+      });
+    } catch (e) {
+      throw new InternalServerErrorException(
+        `Can not upload file ${file.originalname}`,
+      );
+    }
   }
 
   /**
