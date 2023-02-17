@@ -5,13 +5,12 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Question, QuestionDocument } from './question.schema';
-import { QuestionDto } from './DTO/question.dto';
-import { QuestionType } from './enum/question-type';
+import { Quiz, QuizDocument } from '../quiz/quiz.schema';
 import { CreateQuestionDto } from './DTO/create-question.dto';
 import { EditQuestionDto } from './DTO/edit-question.dto';
-import { Quiz, QuizDocument } from '../quiz/quiz.schema';
-import { QuizService } from '../quiz/quiz.service';
+import { QuestionDto } from './DTO/question.dto';
+import { QuestionType } from './enum/question-type';
+import { Question, QuestionDocument } from './question.schema';
 
 type TQuestion = {
   id: string;
@@ -229,6 +228,10 @@ export class QuestionService {
       throw new BadRequestException('Orders are the same');
     }
     await this.questionModel.findByIdAndUpdate(questionId, { index: newOrder });
+  }
+
+  public getFileExtensionFromString(str: string): string | undefined {
+    return str.split('.').pop();
   }
 
   /**
