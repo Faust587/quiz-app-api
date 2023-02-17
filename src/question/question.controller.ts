@@ -3,7 +3,6 @@ import {
   Body,
   Controller,
   Delete,
-  InternalServerErrorException,
   NotAcceptableException,
   Param,
   Patch,
@@ -25,7 +24,6 @@ import { EditQuestionDto } from './DTO/edit-question.dto';
 import { DeleteQuestionDto } from './DTO/delete-question.dto';
 import { ChangeQuestionOrderDto } from './DTO/change-question-order.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import * as fs from 'fs';
 
 @Controller('question')
 export class QuestionController {
