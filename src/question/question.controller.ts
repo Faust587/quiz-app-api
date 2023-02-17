@@ -47,7 +47,7 @@ export class QuestionController {
     const quiz = await this.quizService.getQuizById(quizId);
     if (quiz.author !== id)
       throw new NotAcceptableException('You are not the author of this quiz');
-    // const question = this.questionService.getQuestionById(questionId);
+    await this.questionService.getQuestionById(questionId);
     const fileExtension = this.questionService.getFileExtensionFromString(
       file.originalname,
     );
