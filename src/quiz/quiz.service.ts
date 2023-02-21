@@ -38,8 +38,8 @@ export class QuizService {
     const utc = this.getCurrentUTC();
     return this.quizModel
       .findOneAndUpdate(
-        { code: quizCode, lastUpdated: utc },
-        { code },
+        { code: quizCode },
+        { code, lastUpdated: utc },
         { new: true },
       )
       .select([
