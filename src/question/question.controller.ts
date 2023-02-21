@@ -43,18 +43,18 @@ export class QuestionController {
   ) {
     const { id } = req.user as IJwtPayload;
     const quiz = await this.quizService.getQuizById(quizId);
+    const isExists = !!quiz.questions.find((value) => value.id === questionId);
+    if (!isExists) {
+      throw new BadRequestException("Question don't exists on this quiz");
+    }
     if (quiz.author !== id)
       throw new NotAcceptableException('You are not the author of this quiz');
     await this.questionService.getQuestionById(questionId);
-    const fileExtension = this.questionService.getFileExtensionFromString(
-      file.originalname,
-    );
-    this.questionService.createFileForQuestionAttachment(
-      fileExtension,
+    const question = await this.questionService.addQuestionAttachment(
       questionId,
       file,
     );
-    return 'OK';
+    return question;
   }
 
   @Post()

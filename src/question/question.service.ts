@@ -19,6 +19,8 @@ type TQuestion = {
   type: QuestionType;
   index: number;
   value?: string[];
+  attachmentName?: string;
+  isFileUploaded: boolean;
   isRequired: boolean;
 };
 
@@ -28,6 +30,20 @@ export class QuestionService {
     @InjectModel(Question.name) private questionModel: Model<QuestionDocument>,
     @InjectModel(Quiz.name) private quizModel: Model<QuizDocument>,
   ) {}
+
+  public async addQuestionAttachment(
+    questionId: string,
+    file: Express.Multer.File,
+  ) {
+    const fileExtension = this.getFileExtensionFromString(file.originalname);
+    const isExists = await this.isQuestionAttachmentExistsById(questionId);
+    if (isExists) await this.deleteQuestionAttachmentById(questionId);
+    await this.createFileForQuestionAttachment(fileExtension, questionId, file);
+    await this.questionModel.findByIdAndUpdate(questionId, {
+      attachmentName: file.originalname,
+    });
+    return this.getQuestionById(questionId);
+  }
 
   public async createQuestion(question: CreateQuestionDto, index: number) {
     const { name, isRequired, value, type } = question;
@@ -136,14 +152,15 @@ export class QuestionService {
     return data;
   }
 
-  public async getQuestionById(id: string) {
+  public async getQuestionById(id: string): Promise<TQuestion> {
     const question = await this.questionModel.findById(id);
     if (!question)
       throw new BadRequestException(`question with id ${id} does not exists`);
     return {
       id: question.id,
-      type: question.type,
+      type: question.type as QuestionType,
       value: question.value,
+      attachmentName: question.attachmentName,
       isRequired: question.isRequired,
       isFileUploaded: question.isFileUploaded,
       name: question.name,
@@ -156,17 +173,20 @@ export class QuestionService {
       ids.map(async (id) => {
         return this.questionModel
           .findById(id)
-          .select(['_id', 'type', 'value', 'isRequired', 'name', 'index']);
+          .select([
+            '_id',
+            'type',
+            'value',
+            'isRequired',
+            'name',
+            'index',
+            'isFileUploaded',
+            'attachmentName',
+          ]);
       }),
     );
     return questionsData.map((question) => {
-      if (
-        !question?._id ||
-        !question?.type ||
-        question?.isRequired === null ||
-        !question?.name
-      )
-        throw new InternalServerErrorException();
+      if (!question) throw new InternalServerErrorException();
       return {
         id: question._id.toString(),
         type: question.type as QuestionType,
@@ -174,6 +194,8 @@ export class QuestionService {
         isRequired: question.isRequired,
         name: question.name,
         index: question.index,
+        isFileUploaded: question.isFileUploaded,
+        attachmentName: question.attachmentName,
       };
     });
   }
@@ -241,7 +263,7 @@ export class QuestionService {
     file: Express.Multer.File,
   ) {
     const stream = fs.createWriteStream(
-      `src/data/${questionId}${fileExtension || ''}`,
+      `src/data/${questionId}${`.${fileExtension}` || ''}`,
     );
     try {
       stream.once('open', () => {
@@ -253,6 +275,47 @@ export class QuestionService {
         `Can not upload file ${file.originalname}`,
       );
     }
+  }
+
+  private async isQuestionAttachmentExistsById(questionId: string) {
+    return new Promise((resolve) => {
+      fs.readdir('src/data/', (err, files) => {
+        if (err) {
+          console.log(err);
+          throw new InternalServerErrorException(err);
+        }
+        files.forEach((fileName) => {
+          if (questionId === fileName.split('.').shift()) resolve(true);
+        });
+        resolve(false);
+      });
+    });
+  }
+
+  private async deleteQuestionAttachmentById(fileName: string) {
+    return new Promise((resolve) => {
+      fs.readdir('src/data/', (err, files) => {
+        if (err) {
+          console.log(err);
+          throw new InternalServerErrorException(err);
+        }
+        files.forEach((name) => {
+          const fullName = name.repeat(1);
+          if (fileName === name.split('.').shift()) {
+            fs.unlink(`src/data/${fullName}`, (err) => {
+              if (err) {
+                console.log(err);
+                throw new InternalServerErrorException(
+                  "can't delete attachment",
+                );
+              }
+              resolve(true);
+            });
+          }
+        });
+        resolve(false);
+      });
+    });
   }
 
   /**
