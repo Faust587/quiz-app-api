@@ -35,14 +35,28 @@ export class QuestionService {
     questionId: string,
     file: Express.Multer.File,
   ) {
-    const fileExtension = this.getFileExtensionFromString(file.originalname);
+    const encodedName = decodeURIComponent(file.originalname);
+    const fileExtension = this.getFileExtensionFromString(encodedName);
     const isExists = await this.isQuestionAttachmentExistsById(questionId);
-    if (isExists) await this.deleteQuestionAttachmentById(questionId);
+    if (isExists) await this.deleteFileById(questionId);
     await this.createFileForQuestionAttachment(fileExtension, questionId, file);
     await this.questionModel.findByIdAndUpdate(questionId, {
-      attachmentName: file.originalname,
+      attachmentName: encodedName,
+      isFileUploaded: true,
     });
     return this.getQuestionById(questionId);
+  }
+
+  public async downloadAttachment(questionId: string) {
+    const isAttachmentExists = await this.isQuestionAttachmentExistsById(
+      questionId,
+    );
+    if (!isAttachmentExists) {
+      throw new BadRequestException(
+        'Attachment for this question does not exists',
+      );
+    }
+    return questionId;
   }
 
   public async createQuestion(question: CreateQuestionDto, index: number) {
@@ -120,6 +134,16 @@ export class QuestionService {
       },
       { new: true },
     );
+  }
+
+  public async deleteQuestionAttachmentById(questionId: string) {
+    const isDeleted = await this.deleteFileById(questionId);
+    if (!isDeleted) throw new InternalServerErrorException('Unknown error');
+    await this.questionModel.findByIdAndUpdate(questionId, {
+      attachmentName: '',
+      isFileUploaded: false,
+    });
+    return this.getQuestionById(questionId);
   }
 
   public async deleteQuestionById(questionId: string, questions: TQuestion[]) {
@@ -277,7 +301,9 @@ export class QuestionService {
     }
   }
 
-  private async isQuestionAttachmentExistsById(questionId: string) {
+  private async isQuestionAttachmentExistsById(
+    questionId: string,
+  ): Promise<boolean> {
     return new Promise((resolve) => {
       fs.readdir('src/data/', (err, files) => {
         if (err) {
@@ -292,7 +318,7 @@ export class QuestionService {
     });
   }
 
-  private async deleteQuestionAttachmentById(fileName: string) {
+  private async deleteFileById(fileName: string) {
     return new Promise((resolve) => {
       fs.readdir('src/data/', (err, files) => {
         if (err) {
@@ -309,11 +335,10 @@ export class QuestionService {
                   "can't delete attachment",
                 );
               }
-              resolve(true);
             });
           }
         });
-        resolve(false);
+        resolve(true);
       });
     });
   }
