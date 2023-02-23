@@ -35,8 +35,14 @@ export class Question {
 
   @Prop({
     default: false,
+    isRequired: true,
   })
   isFileUploaded: boolean;
+
+  @Prop({
+    required: false,
+  })
+  attachmentName: string;
 
   @Prop({
     required: true,

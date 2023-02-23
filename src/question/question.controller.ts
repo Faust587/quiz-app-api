@@ -3,19 +3,21 @@ import {
   Body,
   Controller,
   Delete,
-  InternalServerErrorException,
+  Get,
   NotAcceptableException,
   Param,
   Patch,
   Post,
   Req,
+  Res,
+  UnauthorizedException,
   UploadedFile,
   UseGuards,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateQuestionDto } from './DTO/create-question.dto';
 import { IJwtPayload } from '../auth/jwt-payload.interface';
@@ -25,13 +27,14 @@ import { EditQuestionDto } from './DTO/edit-question.dto';
 import { DeleteQuestionDto } from './DTO/delete-question.dto';
 import { ChangeQuestionOrderDto } from './DTO/change-question-order.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import * as fs from 'fs';
+import { TokenService } from 'src/token/token.service';
 
 @Controller('question')
 export class QuestionController {
   constructor(
     private quizService: QuizService,
     private questionService: QuestionService,
+    private tokenService: TokenService,
   ) {}
 
   @Post('upload/:quizId/:questionId')
@@ -45,24 +48,18 @@ export class QuestionController {
   ) {
     const { id } = req.user as IJwtPayload;
     const quiz = await this.quizService.getQuizById(quizId);
+    const isExists = !!quiz.questions.find((value) => value.id === questionId);
+    if (!isExists) {
+      throw new BadRequestException("Question don't exists on this quiz");
+    }
     if (quiz.author !== id)
       throw new NotAcceptableException('You are not the author of this quiz');
-    const question = this.questionService.getQuestionById(questionId);
-    const fileExtension = file.originalname.split('.').pop();
-    const stream = fs.createWriteStream(
-      `src/data/${questionId}.${fileExtension}`,
+    await this.questionService.getQuestionById(questionId);
+    const question = await this.questionService.addQuestionAttachment(
+      questionId,
+      file,
     );
-    try {
-      stream.once('open', () => {
-        stream.write(file.buffer);
-        stream.end();
-      });
-    } catch (e) {
-      throw new InternalServerErrorException(
-        `Can not upload file ${file.originalname}`,
-      );
-    }
-    return 'OK';
+    return question;
   }
 
   @Post()
@@ -130,6 +127,69 @@ export class QuestionController {
         'This question does not exists in this quiz',
       );
     return await this.questionService.editQuestionById(editQuestionDto);
+  }
+
+  @Get('attachment/:quizId/:questionId')
+  async downloadAttachment(
+    @Res() res: Response,
+    @Req() req: Request,
+    @Param('questionId') questionId: string,
+    @Param('quizId') quizId: string,
+  ) {
+    const { authorization } = req.headers;
+    const quiz = await this.quizService.getQuizById(quizId);
+    const isExists = !!quiz.questions.find((value) => value.id === questionId);
+    if (!isExists) {
+      throw new BadRequestException("Question don't exists on this quiz");
+    }
+    if (quiz.onlyAuthUsers) {
+      if (!authorization)
+        throw new UnauthorizedException('This quiz only for registered users');
+      const accessToken = authorization.split('Bearer ')[1];
+      const { id } = this.tokenService.checkAccessToken(
+        accessToken,
+      ) as IJwtPayload;
+      if (!id) throw new UnauthorizedException('Only for authorized users');
+    }
+    if (quiz.closed) {
+      if (!authorization)
+        throw new UnauthorizedException('This quiz only for registered users');
+      const accessToken = authorization.split('Bearer ')[1];
+      const { id } = this.tokenService.checkAccessToken(
+        accessToken,
+      ) as IJwtPayload;
+      if (quiz.author !== id)
+        throw new NotAcceptableException('Quiz is closed');
+    }
+    const question = await this.questionService.getQuestionById(questionId);
+    if (!question)
+      throw new BadRequestException('This question does not exists');
+    if (!question.attachmentName)
+      throw new BadRequestException('This question does not have attachment');
+    const fileName = await this.questionService.downloadAttachment(questionId);
+    const fileExtension = this.questionService.getFileExtensionFromString(
+      question.attachmentName,
+    );
+    const file = `./src/data/${fileName}.${fileExtension}`;
+    res.download(file);
+  }
+
+  @Delete('attachment/:quizId/:questionId')
+  @UseGuards(AuthGuard())
+  async deleteQuestionAttachment(
+    @Req() req: Request,
+    @Param('questionId') questionId: string,
+    @Param('quizId') quizId: string,
+  ) {
+    const { id } = req.user as IJwtPayload;
+    const quiz = await this.quizService.getQuizById(quizId);
+    const isExists = !!quiz.questions.find((value) => value.id === questionId);
+    if (!isExists) {
+      throw new BadRequestException("Question don't exists on this quiz");
+    }
+    if (quiz.author !== id)
+      throw new NotAcceptableException('You are not the author of this quiz');
+    return this.questionService.deleteQuestionAttachmentById(questionId);
   }
 
   @Delete()

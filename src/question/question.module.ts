@@ -6,6 +6,7 @@ import { QuestionController } from './question.controller';
 import { QuizModule } from '../quiz/quiz.module';
 import { AuthModule } from '../auth/auth.module';
 import { Quiz, QuizSchema } from '../quiz/quiz.schema';
+import { TokenModule } from 'src/token/token.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { Quiz, QuizSchema } from '../quiz/quiz.schema';
       },
     ]),
     AuthModule,
+    TokenModule,
     forwardRef(() => QuizModule),
   ],
   providers: [QuestionService],
