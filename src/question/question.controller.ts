@@ -137,22 +137,27 @@ export class QuestionController {
     @Param('quizId') quizId: string,
   ) {
     const { authorization } = req.headers;
-    if (!authorization)
-      throw new UnauthorizedException('This quiz only for registered users');
-    const accessToken = authorization.split('Bearer ')[1];
-    const { id } = this.tokenService.checkAccessToken(
-      accessToken,
-    ) as IJwtPayload;
-
     const quiz = await this.quizService.getQuizById(quizId);
     const isExists = !!quiz.questions.find((value) => value.id === questionId);
     if (!isExists) {
       throw new BadRequestException("Question don't exists on this quiz");
     }
     if (quiz.onlyAuthUsers) {
+      if (!authorization)
+        throw new UnauthorizedException('This quiz only for registered users');
+      const accessToken = authorization.split('Bearer ')[1];
+      const { id } = this.tokenService.checkAccessToken(
+        accessToken,
+      ) as IJwtPayload;
       if (!id) throw new UnauthorizedException('Only for authorized users');
     }
     if (quiz.closed) {
+      if (!authorization)
+        throw new UnauthorizedException('This quiz only for registered users');
+      const accessToken = authorization.split('Bearer ')[1];
+      const { id } = this.tokenService.checkAccessToken(
+        accessToken,
+      ) as IJwtPayload;
       if (quiz.author !== id)
         throw new NotAcceptableException('Quiz is closed');
     }
