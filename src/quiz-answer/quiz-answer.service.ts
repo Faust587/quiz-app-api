@@ -63,10 +63,7 @@ export class QuizAnswerService {
             break;
           }
           case QuestionType.TEXT: {
-            if (
-              typeof answer.answerText !== 'string' ||
-              answer.answerText.length === 0
-            )
+            if (answer.answerText.length === 0)
               throw new BadRequestException(
                 `answer for question ${question.index} is required!`,
               );
