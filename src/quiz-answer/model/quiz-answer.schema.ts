@@ -1,5 +1,8 @@
 import { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Answer } from './answer.schema';
+import { Quiz } from '../../quiz/quiz.schema';
+import { User } from '../../user/model/user.schema';
 
 export type QuizAnswerDocument = HydratedDocument<QuizAnswer>;
 
@@ -19,13 +22,13 @@ export type QuizAnswerDocument = HydratedDocument<QuizAnswer>;
   versionKey: false,
 })
 export class QuizAnswer {
-  @Prop({ required: true })
+  @Prop({ required: true, ref: Quiz.name })
   quizId: string;
 
-  @Prop({ required: false })
+  @Prop({ required: false, ref: User.name })
   authorId: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, ref: Answer.name })
   answers: string[];
 
   @Prop({

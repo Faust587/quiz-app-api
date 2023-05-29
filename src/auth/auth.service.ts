@@ -56,7 +56,6 @@ export class AuthService {
 
     const { accessToken, refreshToken } =
       this.tokenService.generateTokensPair(payload);
-
     await this.tokenService.saveUserRefreshToken(refreshToken, user.id);
 
     return {

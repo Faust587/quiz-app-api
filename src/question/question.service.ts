@@ -319,7 +319,7 @@ export class QuestionService {
   }
 
   private async deleteFileById(fileName: string) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       fs.readdir('src/data/', (err, files) => {
         if (err) {
           console.log(err);
@@ -331,9 +331,7 @@ export class QuestionService {
             fs.unlink(`src/data/${fullName}`, (err) => {
               if (err) {
                 console.log(err);
-                throw new InternalServerErrorException(
-                  "can't delete attachment",
-                );
+                reject(false);
               }
             });
           }
