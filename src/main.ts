@@ -10,7 +10,7 @@ async function bootstrap() {
   });
   app.use(cookieParser(process.env.JWT_SECRET_KEY));
   app.enableCors({
-    origin: 'https://faust587.github.io/quiz-generator-front-end/',
+    origin: 'https://faust587.github.io',
     credentials: true,
   });
   app.useStaticAssets(join(__dirname, '..', 'public'), {
