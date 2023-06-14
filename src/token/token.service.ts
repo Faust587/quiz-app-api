@@ -17,7 +17,7 @@ export class TokenService {
   public generateTokensPair(payload: IJwtPayload): TTokensPair {
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
-      expiresIn: 10000,
+      expiresIn: 99999999999,
     });
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
