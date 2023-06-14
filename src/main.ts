@@ -10,8 +10,8 @@ async function bootstrap() {
   });
   app.use(cookieParser(process.env.JWT_SECRET_KEY));
   app.enableCors({
-    origin: 'http://localhost:3000',
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
   });
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     prefix: '/public/',
