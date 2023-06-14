@@ -10,7 +10,7 @@ async function bootstrap() {
   });
   app.use(cookieParser(process.env.JWT_SECRET_KEY));
   app.enableCors({
-    origin: true,
+    origin: '.',
     credentials: true,
   });
   app.useStaticAssets(join(__dirname, '..', 'public'), {
