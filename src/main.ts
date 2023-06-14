@@ -9,6 +9,9 @@ async function bootstrap() {
     //httpsOptions,
   });
   app.use(cookieParser(process.env.JWT_SECRET_KEY));
+  app.enableCors({
+    credentials: true,
+  });
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     prefix: '/public/',
   });
