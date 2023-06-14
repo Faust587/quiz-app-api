@@ -38,8 +38,8 @@ export class QuizService {
     const utc = this.getCurrentUTC();
     return this.quizModel
       .findOneAndUpdate(
-        { code: quizCode, lastUpdated: utc },
-        { code },
+        { code: quizCode },
+        { code, lastUpdated: utc },
         { new: true },
       )
       .select([
@@ -131,7 +131,10 @@ export class QuizService {
   public async getQuizByCode(code: string) {
     const quiz = await this.quizModel.findOne({ code });
     if (!quiz)
-      throw new BadRequestException('quiz with this code is not exists');
+      throw new BadRequestException({
+        message: 'quiz with this code does not exists',
+        code,
+      });
     const questionIds = quiz.questions;
     const questions = await this.questionService.getQuestionsByIds(questionIds);
     return {
@@ -142,6 +145,7 @@ export class QuizService {
       code: quiz.code,
       author: quiz.author,
       questions,
+      lastUpdated: quiz.lastUpdated,
     };
   }
 

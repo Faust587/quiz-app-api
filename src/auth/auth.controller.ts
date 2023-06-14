@@ -26,7 +26,9 @@ export class AuthController {
   ) {
     const { refreshToken, accessToken, user } =
       await this.authService.userRegistration(registrationUserDto);
-    res.cookie('refreshToken', refreshToken);
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+    });
     res.json({
       user,
       accessToken,
@@ -35,11 +37,16 @@ export class AuthController {
 
   @Post('/login')
   @UsePipes(ValidationPipe)
-  async login(@Res() res: Response, @Body() userLoginDto: UserLoginDto) {
+  async login(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() userLoginDto: UserLoginDto,
+  ) {
     const { user, accessToken, refreshToken } =
       await this.authService.userLogin(userLoginDto);
-
-    res.cookie('refreshToken', refreshToken);
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+    });
     res.json({
       user,
       accessToken,
@@ -48,13 +55,16 @@ export class AuthController {
 
   @Get('/refresh')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
+    console.log(1);
     const { refreshToken } = req.cookies;
     if (!refreshToken)
       throw new UnauthorizedException('There is no refresh token in cookies');
 
     const tokensPair = await this.authService.refreshToken(refreshToken);
     res.clearCookie('refreshToken');
-    res.cookie('refreshToken', tokensPair.refreshToken);
+    res.cookie('refreshToken', tokensPair.refreshToken, {
+      httpOnly: true,
+    });
     res.json({ accessToken: tokensPair.accessToken });
   }
 }

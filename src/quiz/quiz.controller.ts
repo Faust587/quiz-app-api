@@ -22,7 +22,6 @@ import { CreateQuizDto } from './DTO/create-quiz.dto';
 import { QuizService } from './quiz.service';
 import { Request } from 'express';
 import { IJwtPayload } from '../auth/jwt-payload.interface';
-import { AddQuestionsDto } from './DTO/add-questions.dto';
 import { QuizAuthorGuard } from './quiz-author.guard';
 import { TokenService } from '../token/token.service';
 import { UpdateQuizParametersDto } from './DTO/update-quiz-parameters.dto';
