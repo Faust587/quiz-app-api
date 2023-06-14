@@ -1,10 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JsonWebTokenError } from 'jsonwebtoken';
 import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
 import { IJwtPayload } from '../auth/jwt-payload.interface';
 import { RefreshToken, RefreshTokenDocument } from './model/token.schema';
-import { User } from '../user/model/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { TTokensPair } from './types/tokens-pair.type';
 
@@ -19,11 +17,11 @@ export class TokenService {
   public generateTokensPair(payload: IJwtPayload): TTokensPair {
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
-      expiresIn: 4000000,
+      expiresIn: 10000,
     });
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
-      expiresIn: 5000000,
+      expiresIn: 30000,
     });
     return {
       accessToken,
@@ -32,7 +30,8 @@ export class TokenService {
   }
 
   public async isRefreshTokenExists(token: string): Promise<boolean> {
-    return !!(await this.refreshTokenModel.findOne({ token }));
+    const foundToken = await this.refreshTokenModel.findOne({ token });
+    return !!foundToken;
   }
 
   public async deleteRefreshTokenByToken(token: string): Promise<void> {

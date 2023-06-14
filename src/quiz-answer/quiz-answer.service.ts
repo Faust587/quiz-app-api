@@ -24,7 +24,10 @@ export class QuizAnswerService {
 
   public async getAnswersListByQuizCode(quizCode: string) {
     const { id } = await this.quizService.getQuizByCode(quizCode);
-    const answers = await this.quizAnswerModel.find({ quizId: id });
+    const answers = await this.quizAnswerModel
+      .find({ quizId: id })
+      .populate(['answers', 'quizId', 'authorId']);
+
     if (!answers) throw new InternalServerErrorException('can not get answers');
     return answers;
   }

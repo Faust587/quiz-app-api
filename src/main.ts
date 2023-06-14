@@ -5,10 +5,12 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.use(cookieParser());
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    //httpsOptions,
+  });
+  app.use(cookieParser(process.env.JWT_SECRET_KEY));
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: 'http://localhost:3000',
     credentials: true,
   });
   app.useStaticAssets(join(__dirname, '..', 'public'), {
