@@ -12,8 +12,8 @@ async function bootstrap() {
   app.enableCors({
     origin: 'https://faust587.github.io',
     credentials: true,
-    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-    preflightContinue: true.
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    preflightContinue: true
   });
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     prefix: '/public/',
