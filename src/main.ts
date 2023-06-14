@@ -9,12 +9,6 @@ async function bootstrap() {
     //httpsOptions,
   });
   app.use(cookieParser(process.env.JWT_SECRET_KEY));
-  app.enableCors({
-    origin: 'https://faust587.github.io',
-    credentials: true,
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: '*',
-  });
   app.useStaticAssets(join(__dirname, '..', 'public'), {
     prefix: '/public/',
   });
