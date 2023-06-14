@@ -8,9 +8,11 @@ import { QuizModule } from './quiz/quiz.module';
 import { QuizAnswerModule } from './quiz-answer/quiz-answer.module';
 import { QuestionModule } from './question/question.module';
 import { QuizIconModule } from './quiz-icon/quiz-icon.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
+    HttpModule,
     ConfigModule.forRoot({ isGlobal: true }),
     UserModule,
     MongooseModule.forRoot(`${process.env.MONGO_DB_URI}`),
