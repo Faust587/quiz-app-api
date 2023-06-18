@@ -287,7 +287,7 @@ export class QuestionService {
     file: Express.Multer.File,
   ) {
     const stream = fs.createWriteStream(
-      `${__dirname}/../data/${questionId}${`.${fileExtension}` || ''}`,
+      `/tmp/${questionId}${`.${fileExtension}` || ''}`,
     );
     try {
       stream.once('open', () => {
@@ -305,7 +305,7 @@ export class QuestionService {
     questionId: string,
   ): Promise<boolean> {
     return new Promise((resolve) => {
-      fs.readdir('src/data/', (err, files) => {
+      fs.readdir('/tmp/', (err, files) => {
         if (err) {
           console.log(err);
           throw new InternalServerErrorException(err);
@@ -320,7 +320,7 @@ export class QuestionService {
 
   private async deleteFileById(fileName: string) {
     return new Promise((resolve, reject) => {
-      fs.readdir('src/data/', (err, files) => {
+      fs.readdir('/tmp', (err, files) => {
         if (err) {
           console.log(err);
           throw new InternalServerErrorException(err);
@@ -328,7 +328,7 @@ export class QuestionService {
         files.forEach((name) => {
           const fullName = name.repeat(1);
           if (fileName === name.split('.').shift()) {
-            fs.unlink(`src/data/${fullName}`, (err) => {
+            fs.unlink(`/tmp/${fullName}`, (err) => {
               if (err) {
                 console.log(err);
                 reject(false);
