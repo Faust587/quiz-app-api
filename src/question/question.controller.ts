@@ -170,7 +170,7 @@ export class QuestionController {
     const fileExtension = this.questionService.getFileExtensionFromString(
       question.attachmentName,
     );
-    const file = `./src/data/${fileName}.${fileExtension}`;
+    const file = `/tmp/${fileName}.${fileExtension}`;
     res.download(file);
   }
 
