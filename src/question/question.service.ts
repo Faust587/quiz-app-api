@@ -287,7 +287,7 @@ export class QuestionService {
     file: Express.Multer.File,
   ) {
     const stream = fs.createWriteStream(
-      `src/data/${questionId}${`.${fileExtension}` || ''}`,
+      `${__dirname}/../data/${questionId}${`.${fileExtension}` || ''}`,
     );
     try {
       stream.once('open', () => {
